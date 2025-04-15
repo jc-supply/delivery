@@ -5,26 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>配送スケジュール検索</title>
   <style>
-    /* カラーパレット定義 */
+    /* カラーパレット定義（以前と同様） */
     :root {
-      --primary-color: #00796b;        /* メインのアクセント色 */
-      --secondary-color: #004d40;      /* 強調文字色 */
-      --accent-color: #26a69a;         /* ボタンなどのアクセント */
-      --accent-light: #66bb6a;         /* ボタンホバー時 */
-      --bg-gradient-start: #e0f7fa;     /* 背景グラデーション開始色 */
-      --bg-gradient-end: #ffffff;       /* 背景グラデーション終了色 */
-      --card-bg: #e0f2f1;              /* 結果カード背景 */
-      --border-color: #b2dfdb;         /* ボーダー色 */
+      --primary-color: #00796b;
+      --secondary-color: #004d40;
+      --accent-color: #26a69a;
+      --accent-light: #66bb6a;
+      --bg-gradient-start: #e0f7fa;
+      --bg-gradient-end: #ffffff;
+      --card-bg: #e0f2f1;
+      --border-color: #b2dfdb;
       --white: #ffffff;
     }
-
     body {
       background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
     }
-
     .container {
       max-width: 600px;
       margin: 60px auto;
@@ -34,12 +32,10 @@
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
       text-align: center;
     }
-
     h2 {
       color: var(--primary-color);
       margin-bottom: 20px;
     }
-
     label {
       display: block;
       margin-bottom: 5px;
@@ -47,8 +43,7 @@
       text-align: left;
       color: var(--secondary-color);
     }
-
-    select, button {
+    input, button {
       width: 100%;
       padding: 12px;
       margin: 10px 0 20px 0;
@@ -57,12 +52,9 @@
       border-radius: 6px;
       box-sizing: border-box;
     }
-
-    select {
+    input {
       background: var(--white);
-      appearance: none;
     }
-
     button {
       background: linear-gradient(90deg, var(--accent-color), var(--accent-light));
       color: var(--white);
@@ -71,16 +63,13 @@
       transition: background 0.3s;
       font-size: 18px;
     }
-
     button:hover {
       background: linear-gradient(90deg, #2bbbad, #80e27e);
     }
-
     #result {
       margin-top: 30px;
       text-align: left;
     }
-
     .result-header {
       font-size: 22px;
       font-weight: bold;
@@ -89,7 +78,6 @@
       border-bottom: 2px solid var(--border-color);
       padding-bottom: 8px;
     }
-
     .result-card {
       background: var(--card-bg);
       padding: 15px;
@@ -97,17 +85,14 @@
       margin-bottom: 10px;
       border-radius: 6px;
     }
-
     .result-item {
       margin: 5px 0;
     }
-
     .schedule-container {
       display: flex;
       gap: 15px;
       margin-top: 8px;
     }
-
     .schedule-day {
       flex: 1;
       padding: 8px;
@@ -116,26 +101,66 @@
       text-align: center;
       font-weight: 500;
     }
-
     .schedule-weekday {
       background-color: var(--border-color);
       color: var(--secondary-color);
     }
-
     .schedule-saturday {
       background-color: #ffe082;
       color: #ff6f00;
     }
+    /* 都道府県セレクト専用スタイル */
+#prefecture-select {
+  width: 100%;
+  padding: 12px 16px;
+  margin: 10px 0 20px 0;
+  font-size: 16px;
+  color: var(--secondary-color);
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  /* カスタムの下矢印アイコン（SVGデータURL使用） */
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23004d40' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  cursor: pointer;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
 
-    #sub-area-container {
-      display: none;
-    }
+#prefecture-select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(38, 166, 154, 0.3);
+  outline: none;
+}
+
+#truck-animation {
+  position: fixed;
+  bottom: 10px; /* 画面下に配置 */
+  left: -20vw; /* 画面外から出発 */
+  width: 100%;
+  height: 120px;
+  pointer-events: none;
+  overflow: visible; /* 隠れないように */
+  z-index: 1000;
+}
+
+#truck-animation .truck {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 150px;
+}
+
   </style>
 </head>
 <body>
   <div class="container">
     <h2>配送スケジュール検索</h2>
-    <!-- 都道府県選択 -->
+    <!-- 都道府県選択（プルダウン） -->
     <label for="prefecture-select">都道府県を選択：</label>
     <select id="prefecture-select">
       <option value="">都道府県を選択してください</option>
@@ -145,29 +170,38 @@
       <option value="chiba">千葉県</option>
     </select>
     
-    <!-- 市町村選択 -->
-    <label for="area-select">市町村を選択：</label>
-    <select id="area-select" disabled>
-      <option value="">市町村を選択してください</option>
-    </select>
+    <!-- 市町村入力（オートコンプリート） -->
+    <label for="area-input">市町村を入力：</label>
+    <input type="text" id="area-input" list="area-list" placeholder="市町村を入力してください" disabled>
+    <datalist id="area-list"></datalist>
     
-    <!-- エリア選択 -->
-    <label for="region-select">エリアを選択：</label>
-    <select id="region-select" disabled>
-      <option value="">エリアを選択してください</option>
-    </select>
+    <!-- エリア入力（オートコンプリート） -->
+    <label for="region-input">エリアを入力：</label>
+    <input type="text" id="region-input" list="region-list" placeholder="エリアを入力してください" disabled>
+    <datalist id="region-list"></datalist>
     
-    <!-- サブエリア -->
-    <div id="sub-area-container">
-      <label for="sub-area-select">サブエリアを選択：</label>
-      <select id="sub-area-select">
-        <option value="">サブエリアを選択してください</option>
-      </select>
+    <!-- サブエリア入力（オートコンプリート） -->
+    <div id="sub-area-container" style="display:none;">
+      <label for="sub-area-input">サブエリアを入力：</label>
+      <input type="text" id="sub-area-input" list="sub-area-list" placeholder="サブエリアを入力してください">
+      <datalist id="sub-area-list"></datalist>
     </div>
     
     <button onclick="searchSchedule()">検索</button>
     <div id="result"></div>
   </div>
+
+  <!-- トラックアニメーション -->
+  <div id="truck-animation">
+    <svg class="truck" viewBox="0 0 500 450" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="200" width="260" height="100" fill="#ff0000"/>
+      <rect x="280" y="210" width="80" height="90" fill="#808080"/>
+      <rect x="295" y="235" width="50" height="40" fill="#b0e0e6"/>
+      <circle cx="100" cy="320" r="30" fill="#555"/>
+      <circle cx="300" cy="320" r="30" fill="#555"/>
+    </svg>
+  </div>
+  
   <script src="script.js"></script>
 </body>
 </html>
