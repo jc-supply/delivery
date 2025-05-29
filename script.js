@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // **トラックのアニメーションを制御する**
-  if (Math.random() < 1 /1) {
+  if (Math.random() < 1 /5) {
     startTruckAnimation();
   }
 
